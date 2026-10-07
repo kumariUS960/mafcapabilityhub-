@@ -4,9 +4,10 @@ Run:   python -m src.agent_app --user asha                    (one agent that di
        python -m src.agent_app --user meera --mode specialists (supervisor + specialist agents as tools)
        python -m src.agent_app --user asha --mode brief        (specialists run in PARALLEL, one-shot brief)
 
-Needs: az login, and FOUNDRY_PROJECT_ENDPOINT / FOUNDRY_MODEL in a .env file.
+Model: set MODEL_PROVIDER in .env. 'foundry' (default) needs az login and a Foundry project (billed).
+Free options: 'github' (GitHub Models, rate limited) or 'ollama' (local). See README.
 Optional: REGISTRY_BACKEND=azure_search (see README), TRACING=console.
-Calling the model costs money on your Azure subscription. Ask your lead which Foundry project to use.
+Foundry model calls cost money on your Azure subscription; the github and ollama providers do not.
 """
 from __future__ import annotations
 
@@ -36,7 +37,35 @@ SUPERVISOR_INSTRUCTIONS = (
 )
 
 
-def build_client() -> FoundryChatClient:
+def build_client():
+    """Pick the model provider with MODEL_PROVIDER in .env: foundry (default), github (free tier), ollama (free, local)."""
+    provider = os.environ.get("MODEL_PROVIDER", "foundry").strip().lower()
+
+    if provider == "github":
+        # GitHub Models: free, rate-limited, OpenAI-compatible. Needs a token with the models:read permission.
+        from agent_framework.openai import OpenAIChatCompletionClient
+
+        token = os.environ.get("GITHUB_TOKEN")
+        if not token:
+            sys.exit("Set GITHUB_TOKEN in .env (a GitHub token with the Models: Read permission).")
+        return OpenAIChatCompletionClient(
+            model=os.environ.get("GITHUB_MODEL", "openai/gpt-4.1-mini"),
+            api_key=token,
+            base_url="https://models.github.ai/inference",
+        )
+
+    if provider == "ollama":
+        # Ollama: free and fully local. The model you pull must support tool calling.
+        from agent_framework.ollama import OllamaChatClient
+
+        return OllamaChatClient(
+            host=os.environ.get("OLLAMA_HOST", "http://localhost:11434"),
+            model=os.environ.get("OLLAMA_MODEL", "llama3.1"),
+        )
+
+    if provider != "foundry":
+        sys.exit("MODEL_PROVIDER must be foundry, github or ollama.")
+
     missing = [v for v in ("FOUNDRY_PROJECT_ENDPOINT", "FOUNDRY_MODEL") if not os.environ.get(v)]
     if missing:
         sys.exit(f"Missing {', '.join(missing)}. Copy .env.example to .env and fill it in.")

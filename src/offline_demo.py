@@ -29,7 +29,7 @@ async def run_one(cap: dict) -> str:
             out = " ".join(getattr(c, "text", "") or str(c) for c in result).strip()
         return f"MCP tools exposed: {names}. {call.get('tool')} -> {out}"
     await asyncio.sleep(cap.get("simulated_latency_ms", 300) / 1000)  # pretend the call takes time
-    return IMPLEMENTATIONS[cap["name"]]()
+    return IMPLEMENTATIONS[cap["name"]](**cap.get("offline_call", {}).get("args", {}))
 
 
 async def main() -> None:

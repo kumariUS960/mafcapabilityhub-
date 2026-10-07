@@ -5,7 +5,7 @@ A working agent built on Microsoft Agent Framework (Python) that follows the
 list of tools. It searches a capability registry, gets only the tools the signed-in user may use
 (functions and MCP servers), and runs them. High-impact actions wait for human approval.
 
-Built and tested with agent-framework 1.20.0, Python 3.12. **25 tests pass.**
+Built and tested with agent-framework 1.20.0, Python 3.12. **28 tests pass.**
 
 ## What is in it
 
@@ -27,7 +27,7 @@ Built and tested with agent-framework 1.20.0, Python 3.12. **25 tests pass.**
 
 | Command | Azure/model needed? | What it does |
 |---|---|---|
-| `python -m pytest -q` | No | Runs all 25 tests |
+| `python -m pytest -q` | No | Runs all 28 tests |
 | `python -m src.offline_demo --user asha "latest incident and open tickets"` | No | Registry + permissions + approval + a real MCP call, no model |
 | `python -m src.agent_app --user asha` | Yes | The real agent. A Foundry model decides what to ask for |
 | `python -m src.agent_app --user meera --mode specialists` | Yes | Supervisor with specialist agents as tools |
@@ -46,7 +46,30 @@ python -m src.offline_demo --user asha "latest incident and open tickets"
 
 If PowerShell blocks the activate script: `Set-ExecutionPolicy -Scope Process Bypass`, then try again.
 
-## Run the real agent
+## Run it for FREE (no Azure bill)
+
+You do not need a Foundry model to see the agent work. Pick one:
+
+**A. No model at all (free, always works):** `python -m pytest -q` and `python -m src.offline_demo --user asha "latest incident and open tickets"`.
+
+**B. GitHub Models (free tier, rate limited):**
+1. On GitHub, create a fine-grained personal access token with the **Models: Read-only** permission (github.com/settings/tokens).
+2. In `.env`: `MODEL_PROVIDER=github`, `GITHUB_TOKEN=<your token>`, and `GITHUB_MODEL=<exact model id from the GitHub Models marketplace that supports tools>`.
+3. `python -m src.agent_app --user asha`
+
+Notes: it is free but limited per minute and per day, and GitHub can change the models and limits. Use a personal GitHub account
+for this demo, because prompts go to GitHub's hosted service. The demo data here is fake, so that is fine; do not send company data.
+Never put the token in the repo (`.env` is git-ignored).
+
+**C. Ollama (free, runs on your computer):** install Ollama, run `ollama pull llama3.1` (a few GB), then set
+`MODEL_PROVIDER=ollama` and `OLLAMA_MODEL=llama3.1`. Small local models can be unreliable at the
+"discover first, then use the loaded tools" pattern, and they need enough RAM, so expect slower and less consistent answers.
+
+What was verified without a real model: the agent runs correctly through an OpenAI-compatible HTTP endpoint
+(`tests/test_openai_compatible.py`, using a local fake server). That proves the plumbing, not how well a real hosted
+or local model will choose tools.
+
+## Run the real agent with Foundry (billed)
 
 1. `az login`
 2. Copy `.env.example` to `.env`; fill `FOUNDRY_PROJECT_ENDPOINT` and `FOUNDRY_MODEL` from your Foundry project.
@@ -104,5 +127,5 @@ src/tracing.py               OpenTelemetry setup
 src/agent_app.py             the MAF agent and CLI
 src/offline_demo.py          no-cost demo
 scripts/create_search_index.py   create and fill the Azure AI Search index
-tests/                       25 tests
+tests/                       28 tests
 ```
