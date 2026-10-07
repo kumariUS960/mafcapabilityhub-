@@ -1,0 +1,197 @@
+[
+  {
+    "id": "cap-001",
+    "name": "get_incidents",
+    "description": "Search incident tickets, outages and issues by date and filter",
+    "keywords": [
+      "incident",
+      "ticket",
+      "outage",
+      "issue",
+      "problem",
+      "latest"
+    ],
+    "type": "function",
+    "endpoint": "local://incident-service",
+    "domain": "IT Support",
+    "environment": "prod",
+    "allowed_groups": [
+      "Support"
+    ],
+    "classification": "internal",
+    "status": "active",
+    "version": "1.2.0",
+    "owner": "support-platform-team",
+    "requires_approval": false,
+    "simulated_latency_ms": 600
+  },
+  {
+    "id": "cap-002",
+    "name": "get_server_status",
+    "description": "Check server health, status and uptime",
+    "keywords": [
+      "server",
+      "status",
+      "health",
+      "uptime",
+      "machine"
+    ],
+    "type": "function",
+    "endpoint": "local://monitoring-service",
+    "domain": "IT Support",
+    "environment": "prod",
+    "allowed_groups": [
+      "Support"
+    ],
+    "classification": "internal",
+    "status": "active",
+    "version": "2.0.1",
+    "owner": "monitoring-team",
+    "requires_approval": false,
+    "simulated_latency_ms": 350
+  },
+  {
+    "id": "cap-003",
+    "name": "restart_server",
+    "description": "Restart or reboot a server to fix a stuck service",
+    "keywords": [
+      "restart",
+      "reboot",
+      "stuck",
+      "fix"
+    ],
+    "type": "function",
+    "endpoint": "local://ops-service",
+    "domain": "IT Support",
+    "environment": "prod",
+    "allowed_groups": [
+      "Support"
+    ],
+    "classification": "confidential",
+    "status": "active",
+    "version": "1.0.0",
+    "owner": "ops-team",
+    "requires_approval": true,
+    "simulated_latency_ms": 900
+  },
+  {
+    "id": "cap-004",
+    "name": "search_documents",
+    "description": "Search company documents, policies and handbooks, for example the leave policy",
+    "keywords": [
+      "document",
+      "policy",
+      "handbook",
+      "leave",
+      "file"
+    ],
+    "type": "function",
+    "endpoint": "local://document-service",
+    "domain": "Knowledge",
+    "environment": "prod",
+    "allowed_groups": [
+      "Everyone"
+    ],
+    "classification": "internal",
+    "status": "active",
+    "version": "1.1.0",
+    "owner": "knowledge-team",
+    "requires_approval": false,
+    "simulated_latency_ms": 450
+  },
+  {
+    "id": "cap-005",
+    "name": "query_sales_data",
+    "description": "Query sales revenue numbers and reports",
+    "keywords": [
+      "sales",
+      "revenue",
+      "report",
+      "numbers",
+      "quarter"
+    ],
+    "type": "function",
+    "endpoint": "local://sales-service",
+    "domain": "Sales",
+    "environment": "prod",
+    "allowed_groups": [
+      "Data"
+    ],
+    "classification": "confidential",
+    "status": "active",
+    "version": "3.4.0",
+    "owner": "data-platform-team",
+    "requires_approval": false,
+    "simulated_latency_ms": 800
+  },
+  {
+    "id": "cap-006",
+    "name": "check_security_alerts",
+    "description": "Check security alerts and threats",
+    "keywords": [
+      "security",
+      "alert",
+      "threat",
+      "defender",
+      "sentinel"
+    ],
+    "type": "function",
+    "endpoint": "local://security-service",
+    "domain": "Security",
+    "environment": "prod",
+    "allowed_groups": [
+      "Security"
+    ],
+    "classification": "confidential",
+    "status": "active",
+    "version": "1.5.2",
+    "owner": "secops-team",
+    "requires_approval": false,
+    "simulated_latency_ms": 700
+  },
+  {
+    "id": "cap-007",
+    "name": "ticket_system",
+    "description": "Look up helpdesk support tickets in the ticket system: list open or closed tickets and read ticket details",
+    "keywords": [
+      "ticket",
+      "tickets",
+      "helpdesk",
+      "queue",
+      "open",
+      "closed",
+      "vpn",
+      "printer"
+    ],
+    "type": "mcp",
+    "endpoint": "mcp://ticket-system",
+    "mcp": {
+      "transport": "stdio",
+      "command": "python",
+      "args": [
+        "mcp_servers/ticket_server.py"
+      ],
+      "allowed_tools": [
+        "list_tickets",
+        "get_ticket"
+      ]
+    },
+    "offline_call": {
+      "tool": "list_tickets",
+      "args": {
+        "status": "open"
+      }
+    },
+    "domain": "IT Support",
+    "environment": "prod",
+    "allowed_groups": [
+      "Support"
+    ],
+    "classification": "internal",
+    "status": "active",
+    "version": "1.0.0",
+    "owner": "support-platform-team",
+    "requires_approval": false,
+    "simulated_latency_ms": 400
+  }
+]

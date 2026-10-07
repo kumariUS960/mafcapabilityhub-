@@ -1,0 +1,6 @@
+agent-framework
+azure-identity
+azure-search-documents
+opentelemetry-sdk
+python-dotenv
+pytest
