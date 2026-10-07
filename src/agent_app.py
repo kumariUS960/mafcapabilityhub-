@@ -63,8 +63,11 @@ def build_client():
             model=os.environ.get("OLLAMA_MODEL", "llama3.1"),
         )
 
+    if provider == "offline":
+        sys.exit("MODEL_PROVIDER=offline has no model. Use `python -m src.offline_demo` or the web app instead.")
+
     if provider != "foundry":
-        sys.exit("MODEL_PROVIDER must be foundry, github or ollama.")
+        sys.exit("MODEL_PROVIDER must be offline, foundry, github or ollama.")
 
     missing = [v for v in ("FOUNDRY_PROJECT_ENDPOINT", "FOUNDRY_MODEL") if not os.environ.get(v)]
     if missing:

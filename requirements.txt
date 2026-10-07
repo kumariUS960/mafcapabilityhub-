@@ -2,5 +2,8 @@ agent-framework
 azure-identity
 azure-search-documents
 opentelemetry-sdk
+fastapi
+uvicorn
+httpx
 python-dotenv
 pytest

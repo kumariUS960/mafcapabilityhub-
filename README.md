@@ -5,7 +5,7 @@ A working agent built on Microsoft Agent Framework (Python) that follows the
 list of tools. It searches a capability registry, gets only the tools the signed-in user may use
 (functions and MCP servers), and runs them. High-impact actions wait for human approval.
 
-Built and tested with agent-framework 1.20.0, Python 3.12. **28 tests pass.**
+Built and tested with agent-framework 1.20.0, Python 3.12. **36 tests pass.**
 
 ## What is in it
 
@@ -27,7 +27,7 @@ Built and tested with agent-framework 1.20.0, Python 3.12. **28 tests pass.**
 
 | Command | Azure/model needed? | What it does |
 |---|---|---|
-| `python -m pytest -q` | No | Runs all 28 tests |
+| `python -m pytest -q` | No | Runs all 36 tests |
 | `python -m src.offline_demo --user asha "latest incident and open tickets"` | No | Registry + permissions + approval + a real MCP call, no model |
 | `python -m src.agent_app --user asha` | Yes | The real agent. A Foundry model decides what to ask for |
 | `python -m src.agent_app --user meera --mode specialists` | Yes | Supervisor with specialist agents as tools |
@@ -45,6 +45,22 @@ python -m src.offline_demo --user asha "latest incident and open tickets"
 ```
 
 If PowerShell blocks the activate script: `Set-ExecutionPolicy -Scope Process Bypass`, then try again.
+
+## Web app (the "small app" version)
+
+```
+uvicorn src.web_app:app --reload
+```
+Then open http://127.0.0.1:8000. You get a chat page with a user switcher (Asha, Ravi, Meera, Dev the registry admin),
+approval cards for risky actions, a Steps tab (how the agent decided), an Audit tab, and a Registry tab where the admin can
+disable or enable a capability and see the next request change, with no restart.
+
+* With no settings it uses the **offline engine**: no model, no cost. Keyword search stands in for the model; the registry,
+  permission filter, approval rule, real MCP call and audit log are the real project code.
+* Set `MODEL_PROVIDER=github` (or `ollama`, `foundry`) in `.env` and the same page runs the **real MAF agent** instead.
+* The user dropdown is a demo. A real deployment must take the user from a signed-in identity (for example Microsoft Entra ID).
+* Tested: the API with a scripted model (including approval), and the page's JavaScript against the running server in a simulated browser.
+  Not tested: a real browser on your machine, or a real hosted model.
 
 ## Run it for FREE (no Azure bill)
 
@@ -125,7 +141,10 @@ src/specialists.py           specialist agents, supervisor with agents as tools
 src/concurrent_brief.py      parallel specialists with ConcurrentBuilder
 src/tracing.py               OpenTelemetry setup
 src/agent_app.py             the MAF agent and CLI
+src/web_app.py               FastAPI web app (chat, approvals, audit, registry)
+src/engines.py               offline engine and MAF agent engine behind the web app
+web/index.html               the web page
 src/offline_demo.py          no-cost demo
 scripts/create_search_index.py   create and fill the Azure AI Search index
-tests/                       28 tests
+tests/                       36 tests
 ```

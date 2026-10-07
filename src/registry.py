@@ -31,6 +31,7 @@ class User:
     id: str
     name: str
     groups: tuple[str, ...]
+    admin: bool = False  # registry admins may change a capability's status from the web app
 
 
 # Demo users. In a real system these come from Microsoft Entra ID groups, not a dictionary.
@@ -38,6 +39,7 @@ USERS: dict[str, User] = {
     "asha": User("asha", "Asha (Support Engineer)", ("Support", "Everyone")),
     "ravi": User("ravi", "Ravi (Data Analyst)", ("Data", "Everyone")),
     "meera": User("meera", "Meera (Security Analyst)", ("Security", "Everyone")),
+    "dev": User("dev", "Dev (Registry Admin)", ("Everyone",), admin=True),
 }
 
 
@@ -65,6 +67,26 @@ def audit(user: User, capability: str, outcome: str, detail: str = "") -> None:
 def load_registry(path: Path | None = None) -> list[dict]:
     with open(path or REGISTRY_PATH, encoding="utf-8") as f:
         return json.load(f)
+
+
+def set_status(name: str, status: str, path: Path | None = None) -> None:
+    """Change a capability's status in the registry file (active, disabled or deprecated).
+
+    This is how an admin turns a capability off without touching agent code. The next request sees it.
+    """
+    if status not in {"active", "disabled", "deprecated"}:
+        raise ValueError("status must be active, disabled or deprecated")
+    target = path or REGISTRY_PATH
+    caps = load_registry(target)
+    for cap in caps:
+        if cap["name"] == name:
+            cap["status"] = status
+            break
+    else:
+        raise KeyError(name)
+    tmp = target.with_suffix(".tmp")
+    tmp.write_text(json.dumps(caps, indent=2), encoding="utf-8")
+    tmp.replace(target)
 
 
 def _tokens(text: str) -> list[str]:
